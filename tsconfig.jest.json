@@ -3,6 +3,21 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "node",
-    "jsx": "react"
-  }
+    "jsx": "react",
+    "verbatimModuleSyntax": false,
+    "allowImportingTsExtensions": false,
+    "noEmit": false,
+    "types": ["jest", "node"],
+    "paths": {
+      "config": ["./src/__mocks__/config.ts"],
+      "types": ["./src/types/index.ts"],
+      "enums": ["./src/enums/index.ts"],
+      "services/*": ["./src/services/*"],
+      "components/*": ["./src/components/*"],
+      "hooks/*": ["./src/hooks/*"],
+      "helpers/*": ["./src/helpers/*"],
+      "pages/*": ["./src/pages/*"]
+    }
+  },
+  "exclude": []
 }
