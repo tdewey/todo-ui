@@ -3,11 +3,11 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "node",
-    "jsx": "react",
+    "jsx": "react-jsx",
     "verbatimModuleSyntax": false,
     "allowImportingTsExtensions": false,
     "noEmit": false,
-    "types": ["jest", "node"],
+    "types": ["jest", "node", "@testing-library/jest-dom"],
     "paths": {
       "~/config": ["./src/__mocks__/config.ts"],
       "~/*": ["./src/*"]

@@ -30,7 +30,7 @@ npm test
 npm test -- --testPathPattern="ComponentName"
 
 # Type check only
-npx tsc --noEmit
+npm run typecheck --noEmit
 
 # Lint
 npm run lint

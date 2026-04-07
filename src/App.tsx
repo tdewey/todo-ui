@@ -1,11 +1,13 @@
 import { Switch, Route } from 'react-router-dom'
-import './App.scss'
+import Layout from '~/components/Layout'
 
 function App() {
   return (
-    <Switch>
-      <Route exact path="/" render={() => <div />} />
-    </Switch>
+    <Layout>
+      <Switch>
+        <Route exact path="/" render={() => <div />} />
+      </Switch>
+    </Layout>
   )
 }
 
