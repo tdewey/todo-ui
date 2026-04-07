@@ -1,0 +1,14 @@
+.todo-item-root {
+  .todo-item-actions {
+    .action-btn {
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+  }
+
+  &:hover {
+    .todo-item-actions .action-btn {
+      opacity: 1;
+    }
+  }
+}
