@@ -17,14 +17,7 @@
 
     /* Path aliases */
     "paths": {
-      "config": ["./src/config.ts"],
-      "types": ["./src/types/index.ts"],
-      "enums": ["./src/enums/index.ts"],
-      "services/*": ["./src/services/*"],
-      "components/*": ["./src/components/*"],
-      "hooks/*": ["./src/hooks/*"],
-      "helpers/*": ["./src/helpers/*"],
-      "pages/*": ["./src/pages/*"]
+      "~/*": ["./src/*"]
     },
 
     /* Linting */

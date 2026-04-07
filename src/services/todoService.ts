@@ -1,5 +1,5 @@
-import type { CreateTodoDto, Todo, UpdateTodoDto } from 'types';
-import { API_URL } from 'config';
+import type { CreateTodoDto, Todo, UpdateTodoDto } from '~/types';
+import { API_URL } from '~/config';
 
 const BASE = API_URL;
 

@@ -9,14 +9,8 @@
     "noEmit": false,
     "types": ["jest", "node"],
     "paths": {
-      "config": ["./src/__mocks__/config.ts"],
-      "types": ["./src/types/index.ts"],
-      "enums": ["./src/enums/index.ts"],
-      "services/*": ["./src/services/*"],
-      "components/*": ["./src/components/*"],
-      "hooks/*": ["./src/hooks/*"],
-      "helpers/*": ["./src/helpers/*"],
-      "pages/*": ["./src/pages/*"]
+      "~/config": ["./src/__mocks__/config.ts"],
+      "~/*": ["./src/*"]
     }
   },
   "exclude": []
