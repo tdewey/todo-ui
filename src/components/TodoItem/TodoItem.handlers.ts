@@ -64,7 +64,7 @@ export const useHandlers = (todo: Todo) => {
       updateTodo(
         { id: todo.id, dto: { title: todo.title, isCompleted: false } },
         {
-          onSuccess: () => showSnackbar('Task reopened', 'success'),
+          onSuccess: () => showSnackbar('Task reopened', 'info'),
           onError: () => showSnackbar('Failed to update task', 'error'),
         },
       );

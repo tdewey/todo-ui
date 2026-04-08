@@ -5,7 +5,7 @@ const mockTodos = [
 ];
 
 const mockFetch = (response: Partial<Response>) => {
-  global.fetch = jest.fn().mockResolvedValue(response as Response);
+  globalThis.fetch = jest.fn().mockResolvedValue(response as Response);
 };
 
 beforeEach(() => {
@@ -18,7 +18,7 @@ describe('getTodos', () => {
 
     const result = await getTodos();
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/todos'),
       expect.objectContaining({ headers: expect.any(Object) }),
     );
@@ -30,7 +30,7 @@ describe('getTodos', () => {
 
     await getTodos(false);
 
-    expect(global.fetch).toHaveBeenCalledWith(
+    expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('?isCompleted=false'),
       expect.any(Object),
     );
