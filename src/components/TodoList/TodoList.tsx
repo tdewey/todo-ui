@@ -20,11 +20,12 @@ import './TodoList.scss';
 function TodoList() {
   const { filter, mode, toggleMode } = useDataContext();
   const { data: todos = [], isLoading, isError, refetch } = useTodos(filter);
+  const { data: allTodos = [] } = useTodos(TodoFilter.All);
 
   const { clearDialogOpen, setClearDialogOpen, handleClearCompleted } = useHandlers(todos);
 
   const completedCount = todos.filter(t => t.isCompleted).length;
-  const activeCount = todos.filter(t => !t.isCompleted).length;
+  const activeCount = allTodos.filter(t => !t.isCompleted).length;
 
   const emptyMessage =
     filter === TodoFilter.Completed ? 'No completed tasks yet.' : 'No tasks here.';

@@ -30,14 +30,21 @@ interface DataProviderProps {
 
 export function DataProvider({ children }: DataProviderProps) {
   const [filter, setFilter] = useState<TodoFilter>(TodoFilter.All);
-  const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const [mode, setMode] = useState<'light' | 'dark'>(
+    () => (localStorage.getItem('colorMode') as 'light' | 'dark') ?? 'light',
+  );
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
     message: '',
     severity: 'success',
   });
 
-  const toggleMode = () => setMode(m => (m === 'light' ? 'dark' : 'light'));
+  const toggleMode = () =>
+    setMode(m => {
+      const next = m === 'light' ? 'dark' : 'light';
+      localStorage.setItem('colorMode', next);
+      return next;
+    });
 
   const showSnackbar = (message: string, severity: AlertColor) => {
     setSnackbar({ open: true, message, severity });
