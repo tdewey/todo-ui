@@ -3,19 +3,19 @@ import IconButton from '@mui/material/IconButton';
 import Input from '@mui/material/Input';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import { makeStyles } from '@mui/styles';
 import ConfirmDialog from '~/components/ConfirmDialog';
 import type { Todo } from '~/types';
 import { useHandlers } from './TodoItem.handlers';
-import './TodoItem.scss';
 
 interface TodoItemProps {
   todo: Todo;
 }
 
 function TodoItem({ todo }: TodoItemProps) {
+  const styles = useStyles();
   const {
     isEditing,
     editingText,
@@ -32,24 +32,13 @@ function TodoItem({ todo }: TodoItemProps) {
 
   return (
     <>
-      <Paper
-        variant="outlined"
-        className="todo-item-root"
-        sx={{
-          borderRadius: '10px',
-          px: 2,
-          py: 1.5,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-        }}
-      >
+      <Paper variant="outlined" className={styles.root}>
         <Checkbox
           size="small"
           checked={todo.isCompleted}
           onChange={handleToggleComplete}
           disabled={isEditing}
-          sx={{ p: 0.5, borderRadius: '50%' }}
+          className={styles.checkbox}
         />
 
         {isEditing ? (
@@ -60,36 +49,26 @@ function TodoItem({ todo }: TodoItemProps) {
             onKeyDown={handleEditKeyDown}
             onBlur={commitEdit}
             inputRef={editInputRef}
-            sx={{
-              fontSize: '0.875rem',
-              '&:before': { borderBottomColor: 'primary.main' },
-            }}
+            className={styles.editInput}
           />
         ) : (
           <Typography
             component="span"
             onDoubleClick={startEditing}
-            sx={{
-              flex: 1,
-              fontSize: '0.875rem',
-              textDecoration: todo.isCompleted ? 'line-through' : 'none',
-              color: todo.isCompleted ? 'text.secondary' : 'text.primary',
-              cursor: 'text',
-              userSelect: 'none',
-            }}
+            className={`${styles.title} ${todo.isCompleted ? styles.titleCompleted : ''}`}
           >
             {todo.title}
           </Typography>
         )}
 
         {!isEditing && (
-          <Box className="todo-item-actions" sx={{ display: 'flex', gap: 0.5 }}>
+          <div className={styles.actions}>
             {!todo.isCompleted && (
               <IconButton
                 size="small"
                 onClick={startEditing}
                 aria-label="Edit task"
-                className="action-btn"
+                className={styles.actionBtn}
               >
                 <EditOutlinedIcon fontSize="small" />
               </IconButton>
@@ -98,12 +77,11 @@ function TodoItem({ todo }: TodoItemProps) {
               size="small"
               onClick={() => setDeleteOpen(true)}
               aria-label="Delete task"
-              className="action-btn"
-              sx={{ '&:hover': { color: 'error.main' } }}
+              className={`${styles.actionBtn} ${styles.deleteBtn}`}
             >
               <DeleteOutlineIcon fontSize="small" />
             </IconButton>
-          </Box>
+          </div>
         )}
       </Paper>
 
@@ -120,3 +98,50 @@ function TodoItem({ todo }: TodoItemProps) {
 }
 
 export default TodoItem;
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    borderRadius: '10px !important',
+    padding: `${theme.spacing(1.5)} ${theme.spacing(2)}`,
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+    '&:hover $actionBtn': {
+      opacity: 1,
+    },
+  },
+  checkbox: {
+    padding: `${theme.spacing(0.5)} !important`,
+    borderRadius: '50% !important',
+  },
+  title: {
+    flex: 1,
+    fontSize: '0.875rem',
+    cursor: 'text',
+    userSelect: 'none',
+    color: theme.palette.text.primary,
+  },
+  titleCompleted: {
+    textDecoration: 'line-through',
+    color: theme.palette.text.secondary,
+  },
+  editInput: {
+    fontSize: '0.875rem !important',
+    '&:before': {
+      borderBottomColor: `${theme.palette.primary.main} !important`,
+    },
+  },
+  actions: {
+    display: 'flex',
+    gap: theme.spacing(0.5),
+  },
+  actionBtn: {
+    opacity: 0,
+    transition: 'opacity 0.15s ease',
+  },
+  deleteBtn: {
+    '&:hover': {
+      color: theme.palette.error.main,
+    },
+  },
+}));

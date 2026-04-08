@@ -1,9 +1,9 @@
-import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
+import { makeStyles } from '@mui/styles';
 import { useDataContext } from '~/components/Context';
 import TodoAddInput from '~/components/TodoAddInput';
 import TodoFilters from '~/components/TodoFilters';
@@ -12,6 +12,7 @@ import { TodoFilter } from '~/enums';
 import useTodos from '~/hooks/useTodos';
 
 function TodoPage() {
+  const styles = useStyles();
   const { filter, mode, toggleMode } = useDataContext();
   const { data: todos = [], isLoading, isError, refetch } = useTodos(filter);
   const { data: allTodos = [] } = useTodos(TodoFilter.All);
@@ -26,16 +27,16 @@ function TodoPage() {
 
   return (
     <>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+      <div className={styles.header}>
         <Typography variant="h4" fontWeight="bold">
           My Tasks
         </Typography>
         <IconButton onClick={toggleMode} aria-label="Toggle dark mode">
           {mode === 'dark' ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
         </IconButton>
-      </Box>
+      </div>
 
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography variant="body2" color="text.secondary" className={styles.status}>
         {statusText}
       </Typography>
 
@@ -55,3 +56,15 @@ function TodoPage() {
 }
 
 export default TodoPage;
+
+const useStyles = makeStyles(theme => ({
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing(1),
+  },
+  status: {
+    marginBottom: theme.spacing(4),
+  },
+}));

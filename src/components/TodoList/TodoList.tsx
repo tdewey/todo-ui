@@ -1,14 +1,13 @@
 import Alert from '@mui/material/Alert';
-import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { makeStyles } from '@mui/styles';
 import ConfirmDialog from '~/components/ConfirmDialog';
 import TodoItem from '~/components/TodoItem';
 import type { Todo } from '~/types';
 import { useHandlers } from './TodoList.handlers';
-import './TodoList.scss';
 
 interface TodoListProps {
   todos: Todo[];
@@ -19,6 +18,7 @@ interface TodoListProps {
 }
 
 function TodoList({ todos, isLoading, isError, refetch, emptyMessage }: TodoListProps) {
+  const styles = useStyles();
   const { clearDialogOpen, setClearDialogOpen, handleClearCompleted } = useHandlers(todos);
 
   const completedCount = todos.filter(t => t.isCompleted).length;
@@ -27,9 +27,9 @@ function TodoList({ todos, isLoading, isError, refetch, emptyMessage }: TodoList
     <>
       {isLoading && (
         <Stack spacing={1}>
-          <Skeleton variant="rounded" height={56} sx={{ borderRadius: '10px' }} />
-          <Skeleton variant="rounded" height={56} sx={{ borderRadius: '10px' }} />
-          <Skeleton variant="rounded" height={56} sx={{ borderRadius: '10px' }} />
+          <Skeleton variant="rounded" height={56} className={styles.skeleton} />
+          <Skeleton variant="rounded" height={56} className={styles.skeleton} />
+          <Skeleton variant="rounded" height={56} className={styles.skeleton} />
         </Stack>
       )}
 
@@ -47,7 +47,7 @@ function TodoList({ todos, isLoading, isError, refetch, emptyMessage }: TodoList
       )}
 
       {!isLoading && !isError && todos.length === 0 && (
-        <Typography variant="body2" color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
+        <Typography variant="body2" color="text.secondary" className={styles.emptyState}>
           {emptyMessage}
         </Typography>
       )}
@@ -61,7 +61,7 @@ function TodoList({ todos, isLoading, isError, refetch, emptyMessage }: TodoList
       )}
 
       {completedCount > 0 && (
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', pt: 0.5 }}>
+        <div className={styles.clearFooter}>
           <Button
             variant="text"
             size="small"
@@ -70,7 +70,7 @@ function TodoList({ todos, isLoading, isError, refetch, emptyMessage }: TodoList
           >
             Clear {completedCount} completed
           </Button>
-        </Box>
+        </div>
       )}
 
       <ConfirmDialog
@@ -86,3 +86,19 @@ function TodoList({ todos, isLoading, isError, refetch, emptyMessage }: TodoList
 }
 
 export default TodoList;
+
+const useStyles = makeStyles(theme => ({
+  skeleton: {
+    borderRadius: '10px !important',
+  },
+  emptyState: {
+    paddingTop: theme.spacing(4),
+    paddingBottom: theme.spacing(4),
+    textAlign: 'center',
+  },
+  clearFooter: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    paddingTop: theme.spacing(0.5),
+  },
+}));

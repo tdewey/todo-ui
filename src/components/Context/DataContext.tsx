@@ -50,7 +50,7 @@ export function DataProvider({ children }: DataProviderProps) {
     setSnackbar({ open: true, message, severity });
   };
 
-  const handleClose = () => setSnackbar(s => ({ ...s, open: false }));
+  const handleClose = () => setSnackbar(state => ({ ...state, open: false }));
 
   return (
     <DataContext.Provider value={{ filter, setFilter, mode, toggleMode, showSnackbar }}>

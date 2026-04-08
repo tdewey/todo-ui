@@ -1,19 +1,33 @@
 import type { ReactNode } from 'react';
-import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import { makeStyles } from '@mui/styles';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 function Layout({ children }: LayoutProps) {
+  const styles = useStyles();
+
   return (
-    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: 8 }}>
-      <Container maxWidth="sm" sx={{ maxWidth: '512px !important' }}>
+    <div id="layout-root" className={styles.root}>
+      <Container className={styles.container}>
         {children}
       </Container>
-    </Box>
+    </div>
   );
 }
 
 export default Layout;
+
+const useStyles = makeStyles(theme => ({
+  root: {
+    backgroundColor: theme.palette.background.default,
+    minHeight: '100vh',
+    paddingTop: theme.spacing(8),
+    paddingBottom: theme.spacing(8),
+  },
+  container: {
+    maxWidth: '512px !important',
+  },
+}));

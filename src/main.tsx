@@ -4,6 +4,8 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from '@mui/material/styles'
+import StyledEngineProvider from '@mui/material/StyledEngineProvider'
+import { ThemeProvider as StylesThemeProvider } from '@mui/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { DataContext, DataProvider } from '~/components/Context'
 import { lightTheme, darkTheme } from './theme'
@@ -16,12 +18,16 @@ function ThemedApp() {
   const { mode } = useContext(DataContext)
   const theme = mode === 'dark' ? darkTheme : lightTheme
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </ThemeProvider>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <StylesThemeProvider theme={theme}>
+          <CssBaseline />
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </StylesThemeProvider>
+      </ThemeProvider>
+    </StyledEngineProvider>
   )
 }
 
