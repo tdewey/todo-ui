@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider as StylesThemeProvider } from '@mui/styles';
 import { MemoryRouter } from 'react-router-dom';
 import { lightTheme } from '~/theme';
 import { DataProvider } from '~/components/Context';
@@ -9,11 +10,13 @@ import TodoFilters from './TodoFilters';
 const renderWithProviders = () =>
   render(
     <ThemeProvider theme={lightTheme}>
-      <MemoryRouter>
-        <DataProvider>
-          <TodoFilters />
-        </DataProvider>
-      </MemoryRouter>
+      <StylesThemeProvider theme={lightTheme}>
+        <MemoryRouter>
+          <DataProvider>
+            <TodoFilters />
+          </DataProvider>
+        </MemoryRouter>
+      </StylesThemeProvider>
     </ThemeProvider>,
   );
 
@@ -25,7 +28,7 @@ describe('TodoFilters', () => {
     expect(screen.getByRole('button', { name: 'Completed' })).toBeInTheDocument();
   });
 
-  it('clicking Active tab updates context filter', async () => {
+  it('clicking Active tab marks it as selected', async () => {
     const user = userEvent.setup();
     renderWithProviders();
     await user.click(screen.getByRole('button', { name: 'Active' }));

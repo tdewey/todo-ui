@@ -1,14 +1,16 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider as StylesThemeProvider } from '@mui/styles';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lightTheme } from '~/theme';
 import { DataProvider } from '~/components/Context';
-import useDeleteTodo from '~/hooks/useDeleteTodo';
+import * as todoService from '~/services/todoService';
 import type { Todo } from '~/types';
 import TodoList from './TodoList';
 
-jest.mock('~/hooks/useDeleteTodo');
+jest.mock('~/services/todoService');
 
 const noop = jest.fn();
 
@@ -22,9 +24,9 @@ const makeTodo = (overrides: Partial<Todo> = {}): Todo => ({
 });
 
 const renderWithProviders = (props: Partial<React.ComponentProps<typeof TodoList>> = {}) => {
-  (useDeleteTodo as jest.Mock).mockReturnValue({ deleteTodo: noop, isDeleting: false });
-
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
 
   const defaultProps = {
     todos: [],
@@ -37,22 +39,28 @@ const renderWithProviders = (props: Partial<React.ComponentProps<typeof TodoList
   return render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
-        <MemoryRouter>
-          <DataProvider>
-            <TodoList {...defaultProps} {...props} />
-          </DataProvider>
-        </MemoryRouter>
+        <StylesThemeProvider theme={lightTheme}>
+          <MemoryRouter>
+            <DataProvider>
+              <TodoList {...defaultProps} {...props} />
+            </DataProvider>
+          </MemoryRouter>
+        </StylesThemeProvider>
       </ThemeProvider>
     </QueryClientProvider>,
   );
 };
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  (todoService.deleteTodo as jest.Mock).mockResolvedValue(undefined);
+  (todoService.updateTodo as jest.Mock).mockResolvedValue(undefined);
+});
 
 describe('TodoList', () => {
-  it('shows skeletons while loading', () => {
+  it('shows loading state while loading', () => {
     renderWithProviders({ isLoading: true });
-    expect(document.querySelectorAll('.MuiSkeleton-root').length).toBe(3);
+    expect(screen.getByLabelText('Loading tasks')).toBeInTheDocument();
   });
 
   it('shows error alert on fetch failure', () => {
@@ -71,5 +79,41 @@ describe('TodoList', () => {
     renderWithProviders({ todos });
     expect(screen.getByText('First task')).toBeInTheDocument();
     expect(screen.getByText('Second task')).toBeInTheDocument();
+  });
+
+  it('does not show clear completed button when no completed todos', () => {
+    renderWithProviders({ todos: [makeTodo({ isCompleted: false })] });
+    expect(screen.queryByRole('button', { name: /Clear \d+ completed/ })).not.toBeInTheDocument();
+  });
+
+  it('shows clear completed button when completed todos exist', () => {
+    const todos = [makeTodo({ id: 1, isCompleted: true }), makeTodo({ id: 2, isCompleted: false })];
+    renderWithProviders({ todos });
+    expect(screen.getByRole('button', { name: 'Clear 1 completed' })).toBeInTheDocument();
+  });
+
+  it('clicking clear completed button opens confirm dialog', async () => {
+    const user = userEvent.setup();
+    const todos = [makeTodo({ id: 1, isCompleted: true }), makeTodo({ id: 2, isCompleted: true })];
+    renderWithProviders({ todos });
+    await user.click(screen.getByRole('button', { name: 'Clear 2 completed' }));
+    expect(screen.getByText('Clear completed tasks?')).toBeInTheDocument();
+  });
+
+  it('confirming clear completed calls deleteTodo for each completed todo', async () => {
+    const user = userEvent.setup();
+    const todos = [
+      makeTodo({ id: 1, isCompleted: true }),
+      makeTodo({ id: 2, isCompleted: true }),
+      makeTodo({ id: 3, isCompleted: false }),
+    ];
+    renderWithProviders({ todos });
+    await user.click(screen.getByRole('button', { name: 'Clear 2 completed' }));
+    await user.click(screen.getByRole('button', { name: 'Clear all' }));
+    await waitFor(() => {
+      expect(todoService.deleteTodo).toHaveBeenCalledWith(1);
+      expect(todoService.deleteTodo).toHaveBeenCalledWith(2);
+      expect(todoService.deleteTodo).toHaveBeenCalledTimes(2);
+    });
   });
 });

@@ -1,20 +1,16 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider as StylesThemeProvider } from '@mui/styles';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lightTheme } from '~/theme';
 import { DataProvider } from '~/components/Context';
-import useUpdateTodo from '~/hooks/useUpdateTodo';
-import useDeleteTodo from '~/hooks/useDeleteTodo';
+import * as todoService from '~/services/todoService';
 import type { Todo } from '~/types';
 import TodoItem from './TodoItem';
 
-jest.mock('~/hooks/useUpdateTodo');
-jest.mock('~/hooks/useDeleteTodo');
-
-const mockUpdateTodo = jest.fn();
-const mockDeleteTodo = jest.fn();
+jest.mock('~/services/todoService');
 
 const makeTodo = (overrides: Partial<Todo> = {}): Todo => ({
   id: 1,
@@ -26,25 +22,36 @@ const makeTodo = (overrides: Partial<Todo> = {}): Todo => ({
 });
 
 const renderWithProviders = (todo: Todo) => {
-  (useUpdateTodo as jest.Mock).mockReturnValue({ updateTodo: mockUpdateTodo, isUpdating: false });
-  (useDeleteTodo as jest.Mock).mockReturnValue({ deleteTodo: mockDeleteTodo, isDeleting: false });
-
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
 
   return render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={lightTheme}>
-        <MemoryRouter>
-          <DataProvider>
-            <TodoItem todo={todo} />
-          </DataProvider>
-        </MemoryRouter>
+        <StylesThemeProvider theme={lightTheme}>
+          <MemoryRouter>
+            <DataProvider>
+              <TodoItem todo={todo} />
+            </DataProvider>
+          </MemoryRouter>
+        </StylesThemeProvider>
       </ThemeProvider>
     </QueryClientProvider>,
   );
 };
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  (todoService.updateTodo as jest.Mock).mockResolvedValue({
+    id: 1,
+    title: 'Test task',
+    isCompleted: false,
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+  });
+  (todoService.deleteTodo as jest.Mock).mockResolvedValue(undefined);
+});
 
 describe('TodoItem', () => {
   it('renders todo title', () => {
@@ -54,18 +61,16 @@ describe('TodoItem', () => {
 
   it('completed item shows line-through style', () => {
     renderWithProviders(makeTodo({ isCompleted: true }));
-    const title = screen.getByText('Test task');
-    expect(title).toHaveStyle({ textDecoration: 'line-through' });
+    expect(screen.getByText('Test task')).toHaveStyle({ textDecoration: 'line-through' });
   });
 
   it('clicking checkbox calls updateTodo with isCompleted toggled', async () => {
     const user = userEvent.setup();
     renderWithProviders(makeTodo({ isCompleted: false }));
     await user.click(screen.getByRole('checkbox'));
-    expect(mockUpdateTodo).toHaveBeenCalledWith(
-      { id: 1, dto: { title: 'Test task', isCompleted: true } },
-      expect.any(Object),
-    );
+    await waitFor(() => {
+      expect(todoService.updateTodo).toHaveBeenCalledWith(1, { title: 'Test task', isCompleted: true });
+    });
   });
 
   it('clicking delete button opens confirm dialog', async () => {
@@ -80,7 +85,9 @@ describe('TodoItem', () => {
     renderWithProviders(makeTodo({ id: 42 }));
     await user.click(screen.getByRole('button', { name: 'Delete task' }));
     await user.click(screen.getByRole('button', { name: 'Delete' }));
-    expect(mockDeleteTodo).toHaveBeenCalledWith(42, expect.any(Object));
+    await waitFor(() => {
+      expect(todoService.deleteTodo).toHaveBeenCalledWith(42);
+    });
   });
 
   it('double-clicking title shows inline edit input', async () => {
@@ -90,6 +97,18 @@ describe('TodoItem', () => {
     expect(screen.getByDisplayValue('Edit me')).toBeInTheDocument();
   });
 
+  it('clicking the edit icon button enters edit mode', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(makeTodo({ title: 'Edit me', isCompleted: false }));
+    await user.click(screen.getByRole('button', { name: 'Edit task' }));
+    expect(screen.getByDisplayValue('Edit me')).toBeInTheDocument();
+  });
+
+  it('edit icon button is not shown for completed todos', () => {
+    renderWithProviders(makeTodo({ isCompleted: true }));
+    expect(screen.queryByRole('button', { name: 'Edit task' })).not.toBeInTheDocument();
+  });
+
   it('pressing Escape in edit input cancels without saving', async () => {
     const user = userEvent.setup();
     renderWithProviders(makeTodo({ title: 'Original title' }));
@@ -97,7 +116,19 @@ describe('TodoItem', () => {
     const input = screen.getByDisplayValue('Original title');
     await user.clear(input);
     await user.type(input, 'Changed{Escape}');
-    expect(mockUpdateTodo).not.toHaveBeenCalled();
+    expect(todoService.updateTodo).not.toHaveBeenCalled();
     expect(screen.getByText('Original title')).toBeInTheDocument();
+  });
+
+  it('pressing Enter in edit input saves the updated title', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(makeTodo({ title: 'Original title' }));
+    await user.dblClick(screen.getByText('Original title'));
+    const input = screen.getByDisplayValue('Original title');
+    await user.clear(input);
+    await user.type(input, 'Updated title{Enter}');
+    await waitFor(() => {
+      expect(todoService.updateTodo).toHaveBeenCalledWith(1, { title: 'Updated title', isCompleted: false });
+    });
   });
 });

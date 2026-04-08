@@ -26,7 +26,7 @@ function TodoList({ todos, isLoading, isError, refetch, emptyMessage }: TodoList
   return (
     <>
       {isLoading && (
-        <Stack spacing={1}>
+        <Stack spacing={1} aria-label="Loading tasks">
           <Skeleton variant="rounded" height={56} className={styles.skeleton} />
           <Skeleton variant="rounded" height={56} className={styles.skeleton} />
           <Skeleton variant="rounded" height={56} className={styles.skeleton} />
@@ -76,7 +76,7 @@ function TodoList({ todos, isLoading, isError, refetch, emptyMessage }: TodoList
       <ConfirmDialog
         open={clearDialogOpen}
         title="Clear completed tasks?"
-        message={`This will permanently delete ${completedCount} completed task${completedCount !== 1 ? 's' : ''}.`}
+        message={`This will delete ${completedCount} completed task${completedCount !== 1 ? 's' : ''}.`}
         confirmLabel="Clear all"
         onConfirm={handleClearCompleted}
         onCancel={() => setClearDialogOpen(false)}
