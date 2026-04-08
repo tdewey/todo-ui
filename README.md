@@ -9,7 +9,7 @@ A production-quality todo app built with React 19, MUI v5, and React Query.
 | Language | TypeScript |
 | Framework | React 19 |
 | Build | Vite |
-| UI Library | MUI v5 (`@mui/material`) |
+| UI Library | MUI v5 (`@mui/material`) + `@mui/styles` (`makeStyles`) |
 | Routing | `react-router-dom` v5 |
 | Server State | `@tanstack/react-query` v5 |
 | Tests | Jest + React Testing Library |
@@ -17,7 +17,7 @@ A production-quality todo app built with React 19, MUI v5, and React Query.
 ## Prerequisites
 
 - Node 18+
-- The [todo-api](https://github.com/tdewey-raven/todo-api) backend running on port 5243 (Set in the `.env` file)
+- The [todo-api](https://github.com/tdewey-raven/todo-api) backend running on port 5243 (set in `.env`)
 
 ## Setup
 
@@ -57,12 +57,12 @@ src/
     TodoFilters/
     TodoItem/
     TodoList/
+  constants/      # Shared constants (QueryKeys)
+  enums/          # Shared enums (TodoFilter)
   hooks/          # React Query data hooks (useTodos, useCreateTodo, …)
   pages/          # Page-level components (TodoPage)
-  services/       # API call functions — all fetch calls live here
-  types/          # Shared TypeScript interfaces
-  enums/          # Shared constants (QueryKeys)
-  enums/          # Shared enums (TodoFilter)
+  services/       # API call functions — all fetch() calls live here
+  types/          # Shared TypeScript interfaces + module augmentations
 ```
 
 Each component directory follows a consistent structure:
@@ -70,8 +70,8 @@ Each component directory follows a consistent structure:
 ```
 ComponentName/
   ComponentName.tsx           # Presentational component
-  ComponentName.handlers.ts   # useHandlers() hook keeps component page uncluttered
-  ComponentName.scss          # Component-scoped styles
+  ComponentName.handlers.ts   # useHandlers() hook — event logic only
+  ComponentName.scss          # Component-scoped styles (intentionally empty)
   ComponentName.test.tsx      # Co-located tests
   index.ts                    # Re-export barrel
 ```
@@ -86,7 +86,9 @@ ComponentName/
 
 **Thin components with `useHandlers()`** — event handler logic lives in companion `.handlers.ts` files, keeping components purely presentational and both sides independently testable.
 
-**Dark mode persisted in `localStorage`** — the user's preference survives page refreshes/visits without requiring profile settings.
+**`makeStyles` over `sx`** — all styles are written with `makeStyles` from `@mui/styles` (JSS) rather than MUI's `sx` prop. This collocates styles at the bottom of each component file and keeps JSX clean. `StyledEngineProvider injectFirst` ensures JSS takes precedence over emotion at runtime.
+
+**Dark mode persisted in `localStorage`** — the user's preference survives page refreshes without requiring profile settings.
 
 ## Features
 
@@ -101,9 +103,9 @@ ComponentName/
 ## Assumptions & Trade-offs
 
 - **No auth** — Initial iteration is an MVP. Future iterations would add JWT + a login page.
-- **PATCH `/complete` marks done only** — Unchecking calls `PUT` with `isCompleted: false` (no "uncomplete" endpoint by design)
-- **"Clear completed" calls `DELETE` per item** — No bulk endpoint on the backend..
-- **No pagination** — Fetches all todos; cursor-based pagination would be added in future iterations
+- **PATCH `/complete` marks done only** — Unchecking calls `PUT` with `isCompleted: false` (no dedicated "uncomplete" endpoint).
+- **"Clear completed" calls `DELETE` per item** — No bulk endpoint on the backend; `Promise.all` keeps it clean.
+- **No pagination** — Fetches all todos; cursor-based pagination would be added in future iterations.
 
 ## What I'd Add With More Time
 
