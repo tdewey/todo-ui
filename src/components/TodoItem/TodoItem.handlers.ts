@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import type { Todo } from '~/types';
-import useCompleteTodo from '~/hooks/useCompleteTodo';
 import useUpdateTodo from '~/hooks/useUpdateTodo';
 import useDeleteTodo from '~/hooks/useDeleteTodo';
 import { useDataContext } from '~/components/Context';
@@ -12,7 +11,6 @@ export const useHandlers = (todo: Todo) => {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const editInputRef = useRef<HTMLInputElement>(null);
 
-  const { completeTodo } = useCompleteTodo();
   const { updateTodo } = useUpdateTodo();
   const { deleteTodo } = useDeleteTodo();
   const { showSnackbar } = useDataContext();
@@ -55,20 +53,14 @@ export const useHandlers = (todo: Todo) => {
   };
 
   const handleToggleComplete = () => {
-    if (!todo.isCompleted) {
-      completeTodo(todo.id, {
-        onSuccess: () => showSnackbar('Task completed', 'success'),
+    const isCompleted = !todo.isCompleted;
+    updateTodo(
+      { id: todo.id, dto: { title: todo.title, isCompleted } },
+      {
+        onSuccess: () => showSnackbar(isCompleted ? 'Task completed' : 'Task reopened', isCompleted ? 'success' : 'info'),
         onError: () => showSnackbar('Failed to update task', 'error'),
-      });
-    } else {
-      updateTodo(
-        { id: todo.id, dto: { title: todo.title, isCompleted: false } },
-        {
-          onSuccess: () => showSnackbar('Task reopened', 'info'),
-          onError: () => showSnackbar('Failed to update task', 'error'),
-        },
-      );
-    }
+      },
+    );
   };
 
   const handleDeleteConfirmed = () => {

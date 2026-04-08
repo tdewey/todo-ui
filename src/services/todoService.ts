@@ -44,5 +44,3 @@ export const updateTodo = (id: number, dto: UpdateTodoDto): Promise<Todo> =>
 export const deleteTodo = (id: number): Promise<void> =>
   request<void>(`/api/todos/${id}`, { method: 'DELETE' });
 
-export const completeTodo = (id: number): Promise<Todo> =>
-  request<Todo>(`/api/todos/${id}/complete`, { method: 'PATCH' });

@@ -5,17 +5,14 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { lightTheme } from '~/theme';
 import { DataProvider } from '~/components/Context';
-import useCompleteTodo from '~/hooks/useCompleteTodo';
 import useUpdateTodo from '~/hooks/useUpdateTodo';
 import useDeleteTodo from '~/hooks/useDeleteTodo';
 import type { Todo } from '~/types';
 import TodoItem from './TodoItem';
 
-jest.mock('~/hooks/useCompleteTodo');
 jest.mock('~/hooks/useUpdateTodo');
 jest.mock('~/hooks/useDeleteTodo');
 
-const mockCompleteTodo = jest.fn();
 const mockUpdateTodo = jest.fn();
 const mockDeleteTodo = jest.fn();
 
@@ -29,7 +26,6 @@ const makeTodo = (overrides: Partial<Todo> = {}): Todo => ({
 });
 
 const renderWithProviders = (todo: Todo) => {
-  (useCompleteTodo as jest.Mock).mockReturnValue({ completeTodo: mockCompleteTodo, isCompleting: false });
   (useUpdateTodo as jest.Mock).mockReturnValue({ updateTodo: mockUpdateTodo, isUpdating: false });
   (useDeleteTodo as jest.Mock).mockReturnValue({ deleteTodo: mockDeleteTodo, isDeleting: false });
 
@@ -62,11 +58,14 @@ describe('TodoItem', () => {
     expect(title).toHaveStyle({ textDecoration: 'line-through' });
   });
 
-  it('clicking checkbox calls completeTodo for active item', async () => {
+  it('clicking checkbox calls updateTodo with isCompleted toggled', async () => {
     const user = userEvent.setup();
     renderWithProviders(makeTodo({ isCompleted: false }));
     await user.click(screen.getByRole('checkbox'));
-    expect(mockCompleteTodo).toHaveBeenCalledWith(1, expect.any(Object));
+    expect(mockUpdateTodo).toHaveBeenCalledWith(
+      { id: 1, dto: { title: 'Test task', isCompleted: true } },
+      expect.any(Object),
+    );
   });
 
   it('clicking delete button opens confirm dialog', async () => {

@@ -103,8 +103,7 @@ ComponentName/
 ## Assumptions & Trade-offs
 
 - **No auth** — Initial iteration is an MVP. Future iterations would add JWT + a login page.
-- **PATCH `/complete` marks done only** — Unchecking calls `PUT` with `isCompleted: false` (no dedicated "uncomplete" endpoint).
-- **"Clear completed" calls `DELETE` per item** — No bulk endpoint on the backend; `Promise.all` keeps it clean.
+- **"Clear completed" calls `DELETE` per item** — No bulk endpoint on the backend.
 - **No pagination** — Fetches all todos; cursor-based pagination would be added in future iterations.
 
 ## What I'd Add With More Time
