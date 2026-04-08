@@ -1,73 +1,115 @@
-# React + TypeScript + Vite
+# Todo UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A production-quality todo app built with React 19, MUI v5, and React Query.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Layer | Technology |
+|-------|-----------|
+| Language | TypeScript |
+| Framework | React 19 |
+| Build | Vite |
+| UI Library | MUI v5 (`@mui/material`) + `@mui/styles` (`makeStyles`) |
+| Routing | `react-router-dom` v5 |
+| Server State | `@tanstack/react-query` v5 |
+| Tests | Jest + React Testing Library |
 
-## React Compiler
+## Prerequisites
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node 18+
+- The [todo-api](https://github.com/tdewey-raven/todo-api) backend running on port 5243 (set in `.env`)
 
-## Expanding the ESLint configuration
+## Setup
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```bash
+# 1. Clone the repo
+git clone <repo-url>
+cd todo-ui
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# 2. Configure environment
+cp .env.example .env          # VITE_API_URL is pre-set to http://localhost:5243
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# 3. Install dependencies
+npm install
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 4. Start the dev server
+npm start                     # → http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+> **Note:** The backend must allow CORS from `http://localhost:5173`. See the todo-api README for setup steps.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Running Tests
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm test              # all tests + coverage report
+npm run test:watch    # watch mode during development
 ```
+
+## Project Structure
+
+```
+src/
+  components/     # UI components — one directory per component
+    Context/      # DataContext: filter, dark mode, snackbar state
+    ConfirmDialog/
+    Layout/
+    TodoAddInput/
+    TodoFilters/
+    TodoItem/
+    TodoList/
+  constants/      # Shared constants (QueryKeys)
+  enums/          # Shared enums (TodoFilter)
+  hooks/          # React Query data hooks (useTodos, useCreateTodo, …)
+  pages/          # Page-level components (TodoPage)
+  services/       # API call functions — all fetch() calls live here
+  types/          # Shared TypeScript interfaces + module augmentations
+```
+
+Each component directory follows a consistent structure:
+
+```
+ComponentName/
+  ComponentName.tsx           # Presentational component
+  ComponentName.handlers.ts   # useHandlers() hook — event logic only
+  ComponentName.scss          # Component-scoped styles (intentionally empty)
+  ComponentName.test.tsx      # Co-located tests
+  index.ts                    # Re-export barrel
+```
+
+## Architecture Decisions
+
+**React Query for server state** — caching, background refresh, and loading/error states are handled automatically. Mutations invalidate the `['todos']` cache key so the list stays fresh without manual state synchronisation.
+
+**Native fetch over axios** — the backend contract is straightforward REST with JSON; fetch is sufficient and avoids an unnecessary dependency.
+
+**Context API for UI state** — the active filter (All / Active / Completed), dark mode, and snackbar notifications are cross-cutting UI concerns. A single `DataContext` covers all three cleanly; Redux would be overkill for this scope.
+
+**Thin components with `useHandlers()`** — event handler logic lives in companion `.handlers.ts` files, keeping components purely presentational and both sides independently testable.
+
+**`makeStyles` over `sx`** — all styles are written with `makeStyles` from `@mui/styles` (JSS) rather than MUI's `sx` prop. This collocates styles at the bottom of each component file and keeps JSX clean. `StyledEngineProvider injectFirst` ensures JSS takes precedence over emotion at runtime.
+
+**Dark mode persisted in `localStorage`** — the user's preference survives page refreshes without requiring profile settings.
+
+## Features
+
+- Create, edit (inline double-click or pencil icon), and delete tasks
+- Mark tasks complete / reopen them via checkbox
+- Filter by All / Active / Completed
+- "Clear X completed" with confirmation dialog
+- Dark mode toggle — preference persisted in `localStorage`
+- Toast notifications on all mutations and errors
+- Loading skeletons, error state with retry, and empty states
+
+## Assumptions & Trade-offs
+
+- **No auth** — Initial iteration is an MVP. Future iterations would add JWT + a login page.
+- **"Clear completed" calls `DELETE` per item** — No bulk endpoint on the backend.
+- **No pagination** — Fetches all todos; cursor-based pagination would be added in future iterations.
+
+## What I'd Add With More Time
+
+- Optimistic updates on toggle for instant feedback (currently invalidates and refetches)
+- Due dates — both a backend schema change and a frontend date picker
+- Drag-and-drop reordering
+- End-to-end tests with Playwright
+- CI/CD pipeline (GitHub Actions: lint → test → build on every PR)
