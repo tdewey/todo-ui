@@ -17,7 +17,7 @@ A production-quality todo app built with React 19, MUI v5, and React Query.
 ## Prerequisites
 
 - Node 18+
-- The [todo-api](https://github.com/tdewey-raven/todo-api) backend running on port 5243 (set in `.env`)
+- The [todo-api](https://github.com/tdewey/todo-api) backend running on port 5243 (set in `.env`)
 
 ## Setup
 
