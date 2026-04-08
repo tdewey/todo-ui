@@ -14,7 +14,7 @@ import './main.scss'
 
 const queryClient = new QueryClient()
 
-function ThemedApp() {
+const ThemedApp = () => {
   const { mode } = useContext(DataContext)
   const theme = mode === 'dark' ? darkTheme : lightTheme
   return (

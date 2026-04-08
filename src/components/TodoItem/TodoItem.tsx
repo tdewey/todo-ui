@@ -88,7 +88,7 @@ function TodoItem({ todo }: TodoItemProps) {
       <ConfirmDialog
         open={deleteOpen}
         title="Delete task?"
-        message={`"${todo.title}" will be permanently deleted.`}
+        message={`"${todo.title}" will be deleted.`}
         confirmLabel="Delete"
         onConfirm={handleDeleteConfirmed}
         onCancel={() => setDeleteOpen(false)}
