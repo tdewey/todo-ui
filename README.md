@@ -17,7 +17,7 @@ A production-quality todo app built with React 19, MUI v5, and React Query.
 ## Prerequisites
 
 - Node 18+
-- The [todo-api](https://github.com/tdewey-raven/todo-api) backend running on port 5243
+- The [todo-api](https://github.com/tdewey-raven/todo-api) backend running on port 5243 (Set in the `.env` file)
 
 ## Setup
 
@@ -61,7 +61,8 @@ src/
   pages/          # Page-level components (TodoPage)
   services/       # API call functions — all fetch calls live here
   types/          # Shared TypeScript interfaces
-  enums/          # Shared constants (TodoFilter)
+  enums/          # Shared constants (QueryKeys)
+  enums/          # Shared enums (TodoFilter)
 ```
 
 Each component directory follows a consistent structure:
@@ -69,7 +70,7 @@ Each component directory follows a consistent structure:
 ```
 ComponentName/
   ComponentName.tsx           # Presentational component
-  ComponentName.handlers.ts   # useHandlers() hook — event logic only
+  ComponentName.handlers.ts   # useHandlers() hook keeps component page uncluttered
   ComponentName.scss          # Component-scoped styles
   ComponentName.test.tsx      # Co-located tests
   index.ts                    # Re-export barrel
@@ -85,7 +86,7 @@ ComponentName/
 
 **Thin components with `useHandlers()`** — event handler logic lives in companion `.handlers.ts` files, keeping components purely presentational and both sides independently testable.
 
-**Dark mode persisted in `localStorage`** — the user's preference survives page refreshes without requiring a backend or auth.
+**Dark mode persisted in `localStorage`** — the user's preference survives page refreshes/visits without requiring profile settings.
 
 ## Features
 
@@ -99,11 +100,10 @@ ComponentName/
 
 ## Assumptions & Trade-offs
 
-- **No auth** — the assessment spec didn't require it; a production app would add JWT + a login page
-- **No description field** — removed from the data model by design; title is sufficient for task management
-- **PATCH `/complete` marks done only** — unchecking calls `PUT` with `isCompleted: false` (no "uncomplete" endpoint by design)
-- **"Clear completed" calls `DELETE` per item** — no bulk endpoint on the backend; `Promise.all` keeps it clean
-- **No pagination** — fetches all todos; cursor-based pagination would be added in production
+- **No auth** — Initial iteration is an MVP. Future iterations would add JWT + a login page.
+- **PATCH `/complete` marks done only** — Unchecking calls `PUT` with `isCompleted: false` (no "uncomplete" endpoint by design)
+- **"Clear completed" calls `DELETE` per item** — No bulk endpoint on the backend..
+- **No pagination** — Fetches all todos; cursor-based pagination would be added in future iterations
 
 ## What I'd Add With More Time
 
