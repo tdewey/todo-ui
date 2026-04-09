@@ -7,8 +7,9 @@ const useUpdateTodo = () => {
   const queryClient = useQueryClient();
 
   const { mutate, isPending, error } = useMutation({
-    mutationFn: ({ id, dto }: { id: number; dto: UpdateTodoDto }) =>
-      updateTodo(id, dto),
+    mutationFn: ({ id, dto }: { id: number; dto: UpdateTodoDto }) => {
+      return updateTodo(id, dto);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QueryKeys.todos] });
     },

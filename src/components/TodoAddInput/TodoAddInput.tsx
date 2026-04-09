@@ -4,7 +4,6 @@ import InputBase from '@mui/material/InputBase';
 import Paper from '@mui/material/Paper';
 import { makeStyles } from '@mui/styles';
 import { useHandlers } from './TodoAddInput.handlers';
-import './TodoAddInput.scss';
 
 function TodoAddInput() {
   const styles = useStyles();

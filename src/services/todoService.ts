@@ -33,6 +33,7 @@ export const createTodo = (dto: CreateTodoDto): Promise<Todo> => {
     body: JSON.stringify(dto),
   });
 }
+
 export const updateTodo = (id: number, dto: UpdateTodoDto): Promise<Todo> => {
   return request<Todo>(`api/todos/${id}`, {
     method: 'PUT',
