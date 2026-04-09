@@ -16,7 +16,7 @@ A production-quality todo app built with React 19, MUI v5, and React Query.
 
 ## Prerequisites
 
-- Node 18+
+- Node 20+
 - The [todo-api](https://github.com/tdewey/todo-api) backend running on port 5243 (set in `.env`)
 
 ## Setup
@@ -36,8 +36,6 @@ npm install
 npm start                     # → http://localhost:5173
 ```
 
-> **Note:** The backend must allow CORS from `http://localhost:5173`. See the todo-api README for setup steps.
-
 ## Running Tests
 
 ```bash
@@ -49,20 +47,20 @@ npm run test:watch    # watch mode during development
 
 ```
 src/
-  components/     # UI components — one directory per component
-    Context/      # DataContext: filter, dark mode, snackbar state
+  components/      # UI components — one directory per component
+    Context/       # DataContext: filter, dark mode, snackbar state
     ConfirmDialog/
     Layout/
     TodoAddInput/
     TodoFilters/
     TodoItem/
     TodoList/
-  constants/      # Shared constants (QueryKeys)
-  enums/          # Shared enums (TodoFilter)
-  hooks/          # React Query data hooks (useTodos, useCreateTodo, …)
-  pages/          # Page-level components (TodoPage)
-  services/       # API call functions — all fetch() calls live here
-  types/          # Shared TypeScript interfaces + module augmentations
+  constants/       # Shared constants (QueryKeys)
+  enums/           # Shared enums (TodoFilter)
+  hooks/           # React Query data hooks (useTodos, useCreateTodo, …)
+  pages/           # Page-level components (TodoPage)
+  services/        # API call functions — all fetch() calls live here
+  types/           # Shared TypeScript interfaces + module augmentations
 ```
 
 Each component directory follows a consistent structure:
@@ -71,7 +69,6 @@ Each component directory follows a consistent structure:
 ComponentName/
   ComponentName.tsx           # Presentational component
   ComponentName.handlers.ts   # useHandlers() hook — event logic only
-  ComponentName.scss          # Component-scoped styles (intentionally empty)
   ComponentName.test.tsx      # Co-located tests
   index.ts                    # Re-export barrel
 ```
@@ -87,8 +84,6 @@ ComponentName/
 **Thin components with `useHandlers()`** — event handler logic lives in companion `.handlers.ts` files, keeping components purely presentational and both sides independently testable.
 
 **`makeStyles` over `sx`** — all styles are written with `makeStyles` from `@mui/styles` (JSS) rather than MUI's `sx` prop. This collocates styles at the bottom of each component file and keeps JSX clean. `StyledEngineProvider injectFirst` ensures JSS takes precedence over emotion at runtime.
-
-**Dark mode persisted in `localStorage`** — the user's preference survives page refreshes without requiring profile settings.
 
 ## Features
 
